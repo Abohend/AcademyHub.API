@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\AcademyHub.Application\AcademyHub.Application.csproj" />
     <ProjectReference Include="..\AcademyHub.Domain\AcademyHub.Domain.csproj" />
   </ItemGroup>
 
