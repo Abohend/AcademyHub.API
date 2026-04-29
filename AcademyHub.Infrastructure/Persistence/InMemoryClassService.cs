@@ -29,7 +29,7 @@ namespace AcademyHub.Infrastructure.Persistence
             return Task.FromResult(Result<ClassResponse>.Failure("Failed to create class."));
         }
 
-        public Task<Result<List<ClassResponse>>> GetAllClassesAsync(int page, int pageSize, string? name, string? teacher)
+        public Task<PaginatedResult<List<ClassResponse>>> GetAllClassesAsync(int page, int pageSize, string? name, string? teacher)
         {
             var query = _classes.Values.AsQueryable();
 
@@ -43,6 +43,7 @@ namespace AcademyHub.Infrastructure.Persistence
                 query = query.Where(c => c.Teacher.Contains(teacher, StringComparison.OrdinalIgnoreCase));
             }
 
+            var totalCount = query.Count();
             var classes = query
                 .OrderBy(c => c.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -50,7 +51,7 @@ namespace AcademyHub.Infrastructure.Persistence
                 .Select(MapToResponse)
                 .ToList();
 
-            return Task.FromResult(Result<List<ClassResponse>>.Success(classes));
+            return Task.FromResult(PaginatedResult<List<ClassResponse>>.Success(classes, totalCount, page, pageSize));
         }
 
         public Task<Result> DeleteClassAsync(Guid id)
@@ -87,25 +88,28 @@ namespace AcademyHub.Infrastructure.Persistence
             return Task.FromResult(Result<AverageMarksResponse>.Success(response));
         }
 
-        public Task<Result<List<TopStudentResponse>>> GetTopStudentsAsync(GetTopStudentRequest req)
+        public Task<PaginatedResult<List<TopStudentResponse>>> GetTopStudentsAsync(GetTopStudentRequest req)
         {
             var classId = req.ClassId;
-            var classes = new List<Class>();
+            var query = _classes.Values.AsQueryable();
             if (classId != null)
             {
                 // check class existance
                 if (GetById(classId.Value) == null)
                 {
-                    return Task.FromResult(Result<List<TopStudentResponse>>.Failure("Class not found.", 404));
+                    return Task.FromResult(PaginatedResult<List<TopStudentResponse>>.Failure("Class not found.", 404));
                 }
-                classes = _classes.Values.Where(c => c.Id == classId.Value).ToList();
-            }
-            else
-            {
-                classes = _classes.Values.ToList();
+                query = query.Where(c => c.Id == classId.Value);
             }
 
-            var response = new List<TopStudentResponse>();
+            var totalCount = query.Count();
+            var classes = query
+                .OrderBy(c => c.CreatedAt)
+                .Skip((req.Page - 1) * req.PageSize)
+                .Take(req.PageSize)
+                .ToList();
+
+            var responseData = new List<TopStudentResponse>();
 
             foreach (var c in classes)
             {
@@ -115,7 +119,7 @@ namespace AcademyHub.Infrastructure.Persistence
 
                 var topStudent = topMark == null ? null : InMemoryStudentService.GetById(topMark.StudentId);
 
-                response.Add(new TopStudentResponse
+                responseData.Add(new TopStudentResponse
                 {
                     ClassId = c.Id,
                     ClassName = c.Name,
@@ -123,9 +127,8 @@ namespace AcademyHub.Infrastructure.Persistence
                     StudentName = topStudent != null ? topStudent.FirstName + " " + topStudent.LastName : "No students",
                     TotalMark = topMark != null ? topMark.TotalMark : 0
                 });
-
             }
-            return Task.FromResult(Result<List<TopStudentResponse>>.Success(response));
+            return Task.FromResult(PaginatedResult<List<TopStudentResponse>>.Success(responseData, totalCount, req.Page, req.PageSize));
         }
 
         private static ClassResponse MapToResponse(Class @class)

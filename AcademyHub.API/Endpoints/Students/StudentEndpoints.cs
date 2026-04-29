@@ -43,7 +43,7 @@ namespace AcademyHub.API.Endpoints.Students
         }
     }
 
-    public class GetAllStudentsEndpoint : EndpointWithoutRequest<ApiResponse<List<StudentResponse>>>
+    public class GetAllStudentsEndpoint : EndpointWithoutRequest<PagedResponse<List<StudentResponse>>>
     {
         private readonly IStudentService _studentService;
 
@@ -73,7 +73,15 @@ namespace AcademyHub.API.Endpoints.Students
             if (pageSize <= 0) pageSize = 10;
 
             var result = await _studentService.GetAllStudentsAsync(page, pageSize, name, age);
-            await Send.ResponseAsync(ApiResponse<List<StudentResponse>>.SuccessResponse(result.Value!), result.StatusCode, ct);
+            
+            if (result.IsSuccess)
+            {
+                await Send.ResponseAsync(PagedResponse<List<StudentResponse>>.Create(result.Value!, result.TotalCount, result.PageNumber, result.PageSize), result.StatusCode, ct);
+            }
+            else
+            {
+                await Send.ResponseAsync(PagedResponse<List<StudentResponse>>.ErrorResponse(new List<string> { result.Error! }, "Failed to retrieve students", result.StatusCode), result.StatusCode, ct);
+            }
         }
     }
 }

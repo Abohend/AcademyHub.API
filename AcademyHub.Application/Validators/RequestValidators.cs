@@ -46,8 +46,17 @@ namespace AcademyHub.Application.Validators
     {
         public GetAllValidator()
         {
-            RuleFor(x => x.page).NotEmpty();
-            RuleFor(x => x.pageSize).NotEmpty().LessThan(1000).GreaterThan(0).WithMessage("Page number should be between 0 and 1000");
+            RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+            RuleFor(x => x.PageSize).InclusiveBetween(1, 100).WithMessage("Page size should be between 1 and 100");
+        }
+    }
+
+    public class GetTopStudentValidator : AbstractValidator<GetTopStudentRequest>
+    {
+        public GetTopStudentValidator()
+        {
+            RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+            RuleFor(x => x.PageSize).InclusiveBetween(1, 100).WithMessage("Page size should be between 1 and 100");
         }
     }
 

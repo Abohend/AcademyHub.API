@@ -42,7 +42,7 @@ namespace AcademyHub.Infrastructure.Persistence
             return Task.FromResult(Result<StudentResponse>.Failure("Failed to create student."));
         }
 
-        public Task<Result<List<StudentResponse>>> GetAllStudentsAsync(int page, int pageSize, string? name, int? age)
+        public Task<PaginatedResult<List<StudentResponse>>> GetAllStudentsAsync(int page, int pageSize, string? name, int? age)
         {
             var query = _students.Values.AsQueryable();
 
@@ -57,6 +57,7 @@ namespace AcademyHub.Infrastructure.Persistence
                 query = query.Where(s => s.Age == age.Value);
             }
 
+            var totalCount = query.Count();
             var students = query
                 .OrderBy(s => s.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -64,7 +65,7 @@ namespace AcademyHub.Infrastructure.Persistence
                 .Select(MapToResponse)
                 .ToList();
 
-            return Task.FromResult(Result<List<StudentResponse>>.Success(students));
+            return Task.FromResult(PaginatedResult<List<StudentResponse>>.Success(students, totalCount, page, pageSize));
         }
 
         public Task<Result<StudentResponse>> UpdateStudentAsync(Guid id, UpdateStudentRequest request)

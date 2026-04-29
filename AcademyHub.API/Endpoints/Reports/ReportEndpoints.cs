@@ -1,4 +1,3 @@
-using AcademyHub.Application.DTOs.Requests;
 using AcademyHub.Application.DTOs.Responses;
 using AcademyHub.Application.Interfaces;
 using AcademyHub.Application.Common;

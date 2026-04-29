@@ -1,11 +1,11 @@
-﻿namespace AcademyHub.Application.DTOs.Requests
+namespace AcademyHub.Application.DTOs.Requests
 {
     public class GetAllClassRequest
     {
-        public int page { get; set; }
-        public int pageSize { get; set; }
-        public string? name {  get; set; }
-        public string? teacher { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? Name {  get; set; }
+        public string? Teacher { get; set; }
     }
 }
 

@@ -32,7 +32,7 @@ namespace AcademyHub.API.Endpoints.Classes
         }
     }
 
-    public class GetAllClassesEndpoint : Endpoint<GetAllClassRequest, ApiResponse<List<ClassResponse>>>
+    public class GetAllClassesEndpoint : Endpoint<GetAllClassRequest, PagedResponse<List<ClassResponse>>>
     {
         private readonly IClassService _classService;
 
@@ -50,11 +50,19 @@ namespace AcademyHub.API.Endpoints.Classes
 
         public override async Task HandleAsync(GetAllClassRequest req, CancellationToken ct)
         {
-            if (req.page <= 0) req.page = 1;
-            if (req.pageSize <= 0) req.pageSize = 10;
+            if (req.Page <= 0) req.Page = 1;
+            if (req.PageSize <= 0) req.PageSize = 10;
 
-            var result = await _classService.GetAllClassesAsync(req.page, req.pageSize, req.name, req.teacher);
-            await Send.ResponseAsync(ApiResponse<List<ClassResponse>>.SuccessResponse(result.Value!), result.StatusCode, ct);
+            var result = await _classService.GetAllClassesAsync(req.Page, req.PageSize, req.Name, req.Teacher);
+            
+            if (result.IsSuccess)
+            {
+                await Send.ResponseAsync(PagedResponse<List<ClassResponse>>.Create(result.Value!, result.TotalCount, result.PageNumber, result.PageSize), result.StatusCode, ct);
+            }
+            else
+            {
+                await Send.ResponseAsync(PagedResponse<List<ClassResponse>>.ErrorResponse(new List<string> { result.Error! }, "Failed to retrieve classes", result.StatusCode), result.StatusCode, ct);
+            }
         }
     }
 
