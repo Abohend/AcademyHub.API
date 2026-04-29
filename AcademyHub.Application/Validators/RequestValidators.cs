@@ -42,6 +42,15 @@ namespace AcademyHub.Application.Validators
         }
     }
 
+    public class GetAllValidator : AbstractValidator<GetAllClassRequest>
+    {
+        public GetAllValidator()
+        {
+            RuleFor(x => x.page).NotEmpty();
+            RuleFor(x => x.pageSize).NotEmpty().LessThan(1000).GreaterThan(0).WithMessage("Page number should be between 0 and 1000");
+        }
+    }
+
     public class RecordMarkValidator : AbstractValidator<RecordMarkRequest>
     {
         public RecordMarkValidator()
@@ -52,4 +61,5 @@ namespace AcademyHub.Application.Validators
             RuleFor(x => x.AssignmentMark).InclusiveBetween(0, 100);
         }
     }
+
 }

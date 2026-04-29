@@ -53,5 +53,6 @@ namespace AcademyHub.Infrastructure.Persistence
 
         internal static bool IsEnrolled(Guid studentId, Guid classId)
             => _enrollments.Any(e => e.StudentId == studentId && e.ClassId == classId);
+
     }
 }

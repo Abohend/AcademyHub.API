@@ -1,15 +1,20 @@
 using AcademyHub.API.Middleware;
 using AcademyHub.Application;
+using AcademyHub.Application.Interfaces;
+using AcademyHub.Application.Validators;
 using AcademyHub.Infrastructure;
+using AcademyHub.Infrastructure.Persistence;
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using AcademyHub.Application.Validators;
+using Polly;
+using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+
 builder.Services.AddFastEndpoints(o =>
 {
     // Enable FastEndpoints to discover and run validators that inherit FluentValidation.AbstractValidator<T>
@@ -26,7 +31,7 @@ builder.Services.SwaggerDocument(o =>
     o.DocumentSettings = s =>
     {
         s.Title = "AcademyHub API";
-        s.Version = "v1";
+        s.Version = "v1";   
     };
 });
 
@@ -36,6 +41,8 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.UseFastEndpoints(c =>
 {

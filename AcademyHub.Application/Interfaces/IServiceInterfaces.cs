@@ -19,6 +19,7 @@ namespace AcademyHub.Application.Interfaces
         Task<Result<List<ClassResponse>>> GetAllClassesAsync(int page, int pageSize, string? name, string? teacher);
         Task<Result> DeleteClassAsync(Guid id);
         Task<Result<AverageMarksResponse>> GetAverageMarksAsync(Guid classId);
+        Task<Result<List<TopStudentResponse>>> GetTopStudentsAsync(GetTopStudentRequest request);
     }
 
     public interface IEnrollmentService

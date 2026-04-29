@@ -1,11 +1,8 @@
+using AcademyHub.Application.DTOs.Requests;
 using AcademyHub.Application.DTOs.Responses;
 using AcademyHub.Application.Interfaces;
 using AcademyHub.Application.Common;
 using FastEndpoints;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AcademyHub.API.Endpoints.Reports
 {
@@ -64,4 +61,5 @@ namespace AcademyHub.API.Endpoints.Reports
                 await Send.ResponseAsync(ApiResponse<AverageMarksResponse>.ErrorResponse(new List<string> { result.Error! }, "Calculation failed", result.StatusCode), result.StatusCode, ct);
         }
     }
+
 }

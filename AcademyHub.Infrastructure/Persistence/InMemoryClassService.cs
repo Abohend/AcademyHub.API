@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AcademyHub.Application.Common;
 using AcademyHub.Application.DTOs.Requests;
 using AcademyHub.Application.DTOs.Responses;
@@ -89,6 +85,47 @@ namespace AcademyHub.Infrastructure.Persistence
             };
 
             return Task.FromResult(Result<AverageMarksResponse>.Success(response));
+        }
+
+        public Task<Result<List<TopStudentResponse>>> GetTopStudentsAsync(GetTopStudentRequest req)
+        {
+            var classId = req.ClassId;
+            var classes = new List<Class>();
+            if (classId != null)
+            {
+                // check class existance
+                if (GetById(classId.Value) == null)
+                {
+                    return Task.FromResult(Result<List<TopStudentResponse>>.Failure("Class not found.", 404));
+                }
+                classes = _classes.Values.Where(c => c.Id == classId.Value).ToList();
+            }
+            else
+            {
+                classes = _classes.Values.ToList();
+            }
+
+            var response = new List<TopStudentResponse>();
+
+            foreach (var c in classes)
+            {
+                var topMark = InMemoryMarkService.GetByClassId(c.Id)
+                    .OrderByDescending(m => m.TotalMark)
+                    .FirstOrDefault();
+
+                var topStudent = topMark == null ? null : InMemoryStudentService.GetById(topMark.StudentId);
+
+                response.Add(new TopStudentResponse
+                {
+                    ClassId = c.Id,
+                    ClassName = c.Name,
+                    StudentId = topMark != null ? topMark.StudentId : Guid.Empty,
+                    StudentName = topStudent != null ? topStudent.FirstName + " " + topStudent.LastName : "No students",
+                    TotalMark = topMark != null ? topMark.TotalMark : 0
+                });
+
+            }
+            return Task.FromResult(Result<List<TopStudentResponse>>.Success(response));
         }
 
         private static ClassResponse MapToResponse(Class @class)

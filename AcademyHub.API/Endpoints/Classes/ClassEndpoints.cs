@@ -3,10 +3,6 @@ using AcademyHub.Application.DTOs.Responses;
 using AcademyHub.Application.Interfaces;
 using AcademyHub.Application.Common;
 using FastEndpoints;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AcademyHub.API.Endpoints.Classes
 {
@@ -36,7 +32,7 @@ namespace AcademyHub.API.Endpoints.Classes
         }
     }
 
-    public class GetAllClassesEndpoint : EndpointWithoutRequest<ApiResponse<List<ClassResponse>>>
+    public class GetAllClassesEndpoint : Endpoint<GetAllClassRequest, ApiResponse<List<ClassResponse>>>
     {
         private readonly IClassService _classService;
 
@@ -52,17 +48,12 @@ namespace AcademyHub.API.Endpoints.Classes
             Summary(s => s.Summary = "Get all classes");
         }
 
-        public override async Task HandleAsync(CancellationToken ct)
+        public override async Task HandleAsync(GetAllClassRequest req, CancellationToken ct)
         {
-            var page = Query<int>("page", isRequired: false);
-            var pageSize = Query<int>("pageSize", isRequired: false);
-            var name = Query<string>("name", isRequired: false);
-            var teacher = Query<string>("teacher", isRequired: false);
+            if (req.page <= 0) req.page = 1;
+            if (req.pageSize <= 0) req.pageSize = 10;
 
-            if (page <= 0) page = 1;
-            if (pageSize <= 0) pageSize = 10;
-
-            var result = await _classService.GetAllClassesAsync(page, pageSize, name, teacher);
+            var result = await _classService.GetAllClassesAsync(req.page, req.pageSize, req.name, req.teacher);
             await Send.ResponseAsync(ApiResponse<List<ClassResponse>>.SuccessResponse(result.Value!), result.StatusCode, ct);
         }
     }

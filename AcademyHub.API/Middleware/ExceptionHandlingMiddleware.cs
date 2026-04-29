@@ -31,7 +31,7 @@ namespace AcademyHub.API.Middleware
                 _logger.LogError(ex, "An unhandled exception occurred.");
                 await HandleExceptionAsync(context, ex);
             }
-        }
+            }
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
