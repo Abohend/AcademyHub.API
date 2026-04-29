@@ -10,6 +10,9 @@ namespace AcademyHub.Infrastructure
         {
             // Register as Singletons because they use static in-memory collections
             services.AddSingleton<IStudentService, InMemoryStudentService>();
+            services.AddSingleton<IClassService, InMemoryClassService>();
+            services.AddSingleton<IEnrollmentService, InMemoryEnrollmentService>();
+            services.AddSingleton<IMarkService, InMemoryMarkService>();
 
             return services;
         }

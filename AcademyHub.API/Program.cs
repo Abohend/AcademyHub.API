@@ -1,16 +1,15 @@
 using AcademyHub.API.Middleware;
 using AcademyHub.Application;
-using AcademyHub.Application.Validators;
 using AcademyHub.Infrastructure;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using AcademyHub.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
-
-// Add services to the container.
 builder.Services.AddFastEndpoints(o =>
 {
     // Enable FastEndpoints to discover and run validators that inherit FluentValidation.AbstractValidator<T>

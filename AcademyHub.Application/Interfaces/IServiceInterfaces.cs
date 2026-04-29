@@ -10,5 +10,24 @@ namespace AcademyHub.Application.Interfaces
         Task<Result<List<StudentResponse>>> GetAllStudentsAsync(int page, int pageSize, string? name, int? age);
         Task<Result<StudentResponse>> UpdateStudentAsync(Guid id, UpdateStudentRequest request);
         Task<Result> DeleteStudentAsync(Guid id);
+        Task<Result<StudentReportResponse>> GetStudentReportAsync(Guid studentId);
+    }
+
+    public interface IClassService
+    {
+        Task<Result<ClassResponse>> CreateClassAsync(CreateClassRequest request);
+        Task<Result<List<ClassResponse>>> GetAllClassesAsync(int page, int pageSize, string? name, string? teacher);
+        Task<Result> DeleteClassAsync(Guid id);
+        Task<Result<AverageMarksResponse>> GetAverageMarksAsync(Guid classId);
+    }
+
+    public interface IEnrollmentService
+    {
+        Task<Result> EnrollStudentAsync(CreateEnrollmentRequest request);
+    }
+
+    public interface IMarkService
+    {
+        Task<Result> RecordMarkAsync(RecordMarkRequest request);
     }
 }

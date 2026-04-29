@@ -23,5 +23,33 @@ namespace AcademyHub.Application.Validators
         }
     }
 
+    public class CreateClassValidator : AbstractValidator<CreateClassRequest>
+    {
+        public CreateClassValidator()
+        {
+            RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+            RuleFor(x => x.Teacher).NotEmpty().MaximumLength(100);
+            RuleFor(x => x.Description).MaximumLength(500);
+        }
+    }
 
+    public class CreateEnrollmentValidator : AbstractValidator<CreateEnrollmentRequest>
+    {
+        public CreateEnrollmentValidator()
+        {
+            RuleFor(x => x.StudentId).NotEmpty();
+            RuleFor(x => x.ClassId).NotEmpty();
+        }
+    }
+
+    public class RecordMarkValidator : AbstractValidator<RecordMarkRequest>
+    {
+        public RecordMarkValidator()
+        {
+            RuleFor(x => x.StudentId).NotEmpty();
+            RuleFor(x => x.ClassId).NotEmpty();
+            RuleFor(x => x.ExamMark).InclusiveBetween(0, 100);
+            RuleFor(x => x.AssignmentMark).InclusiveBetween(0, 100);
+        }
+    }
 }

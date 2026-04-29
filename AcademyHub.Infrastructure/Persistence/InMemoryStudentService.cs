@@ -14,9 +14,13 @@ namespace AcademyHub.Infrastructure.Persistence
     public class InMemoryStudentService : IStudentService
     {
         private static readonly ConcurrentDictionary<Guid, Student> _students = new();
+        private readonly IEnrollmentService _enrollmentService;
+        private readonly IMarkService _markService;
 
-        public InMemoryStudentService()
+        public InMemoryStudentService(IEnrollmentService enrollmentService, IMarkService markService)
         {
+            _enrollmentService = enrollmentService;
+            _markService = markService;
         }
 
         public Task<Result<StudentResponse>> CreateStudentAsync(CreateStudentRequest request)
@@ -86,6 +90,43 @@ namespace AcademyHub.Infrastructure.Persistence
             return Task.FromResult(Result.Failure("Student not found.", 404));
         }
 
+        public Task<Result<StudentReportResponse>> GetStudentReportAsync(Guid studentId)
+        {
+            var student = GetById(studentId);
+            if (student == null)
+            {
+                return Task.FromResult(Result<StudentReportResponse>.Failure("Student not found.", 404));
+            }
+
+            var enrollments = InMemoryEnrollmentService.GetByStudentId(studentId);
+            var marks = InMemoryMarkService.GetByStudentId(studentId);
+
+            var reportItems = enrollments.Select(e => {
+                var @class = InMemoryClassService.GetById(e.ClassId);
+                var mark = marks.FirstOrDefault(m => m.ClassId == e.ClassId);
+                
+                return new ClassReportItem
+                {
+                    ClassName = @class?.Name ?? "Unknown Class",
+                    ExamMark = mark?.ExamMark ?? 0,
+                    AssignmentMark = mark?.AssignmentMark ?? 0,
+                    TotalMark = mark?.TotalMark ?? 0
+                };
+            }).ToList();
+
+            var overallAverage = reportItems.Any() ? reportItems.Average(r => r.TotalMark) : 0;
+
+            var response = new StudentReportResponse
+            {
+                StudentId = student.Id,
+                FullName = $"{student.FirstName} {student.LastName}",
+                EnrolledClasses = reportItems,
+                OverallAverageMark = overallAverage
+            };
+
+            return Task.FromResult(Result<StudentReportResponse>.Success(response));
+        }
+
         private static StudentResponse MapToResponse(Student student)
         {
             return new StudentResponse
@@ -97,5 +138,8 @@ namespace AcademyHub.Infrastructure.Persistence
                 CreatedAt = student.CreatedAt
             };
         }
+        
+        // Helper for the report
+        internal static Student? GetById(Guid id) => _students.TryGetValue(id, out var s) ? s : null;
     }
 }
